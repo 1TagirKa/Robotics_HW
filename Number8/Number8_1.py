@@ -1,58 +1,35 @@
 import cv2
-import os
 import numpy as np
-import matplotlib.pyplot as plt
 
-img = cv2.imread('../Picture/1556708032_1.jpg')
-scale_up_x = 0.5
-scale_up_y = 0.5
-scale_down = 0.6
-width = int(img.shape[1] * scale_up_x)
-height = int(img.shape[0] * scale_up_y)
-dim = (width, height)
-a = res_inter_nearset = cv2.resize(img, dim, interpolation = cv2.INTER_NEAREST)
-b = res_inter_linear = cv2.resize(img, dim, interpolation = cv2.INTER_LINEAR)
-c = res_inter_area = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-print(a)
-print(b)
-print(c)
 
-cv2.imshow('INTER_NEARES',a)
-cv2.waitKey()
+def draw_circle(event, x, y, flags, param):
+    global mouseX, mouseY, count
+    if event == cv2.EVENT_LBUTTONDOWN:
+        cv2.circle(img, (x, y), 3, (255, 0, 0), -1)
+        mouseX, mouseY = x, y
+        points[count] = x, y
+        count += 1
+        print(x, y)
 
-cv2.imshow('INTER_LINEAR',b)
-cv2.waitKey()
 
-cv2.imshow('INTER_AREA',c)
-cv2.waitKey()
+count = 0
+points = np.zeros((4, 2))
+img = cv2.imread('cardDeck.jpg')
+
+while True:
+
+    cv2.imshow('deck', img)
+    cv2.setMouseCallback('deck', draw_circle)
+
+    if count == 4:
+        height, width = 400, 300
+        pts1 = np.float32([points[0], points[1], points[2], points[3]])
+        pts2 = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
+        matrix = cv2.getPerspectiveTransform(pts1, pts2)
+        imgOutput = cv2.warpPerspective(img, matrix, (width, height))
+        cv2.imshow("Out", imgOutput)
+
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
+
 cv2.destroyAllWindows()
-
-size = img.shape
-print(size)
-
-columns = 3
-rows = 3
-
-y_patch_length = size[0] / 3
-x_patch_length = size[1] / 3
-for i in range(0, rows):
-    for j in range(0, columns):
-        int_x_patch = int(x_patch_length)
-        int_y_patch = int(y_patch_length)
-        cropped_x = int_x_patch * j
-        cropped_x1 = int_x_patch * (j+1)
-        cropped_y = int_y_patch * i
-        cropped_y1 = int_y_patch * (i+1)
-        patch = img[cropped_y : cropped_y1, cropped_x : cropped_x1]
-        cv2.imwrite('../Picture/patch('+ str(i) +':'+ str(j) + '.png', patch)
-
-import matplotlib.pyplot as plt
-
-fig1, fig2 = plt.subplots(nrows=rows, ncols=columns)
-for i in range(0, rows):
-    for j in range(0, columns):
-        img = plt.imread('../Picture/patch('+ str(i) +':'+ str(j) + '.png')
-        fig2[i,j].axis('off')
-        fig2[i,j].imshow(img)
-plt.tight_layout()
-plt.show()
